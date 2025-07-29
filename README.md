@@ -1,44 +1,65 @@
-# GraphQL Social Network
+# GraphQL Social Network - Scalable Architecture
 
-A NestJS project that uses PostgreSQL as the database with TypeORM and GraphQL (code-first approach). Uses the Apollo driver for GraphQL.
+A production-ready NestJS GraphQL application with PostgreSQL, featuring a scalable architecture with proper separation of concerns, error handling, logging, and monitoring.
 
-## Features
+## 🚀 Features
 
-- **Person Module**: Manage users with posts and followers
-- **Post Module**: Create and manage posts by users
-- **Follower Module**: Handle following relationships between users
-- **GraphQL Subscriptions**: Real-time updates when new persons are created
+- **Scalable Architecture**: Modular design with clear separation of concerns
+- **GraphQL API**: Code-first approach with Apollo Server
+- **Database**: PostgreSQL with TypeORM for robust data management
+- **Authentication Ready**: JWT-based authentication structure
+- **Rate Limiting**: Built-in protection against API abuse
+- **Health Checks**: Application monitoring and status endpoints
+- **Error Handling**: Centralized exception management
+- **Logging**: Structured logging for debugging and monitoring
+- **Configuration Management**: Environment-based configuration
+- **Testing**: Comprehensive testing utilities and structure
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 src/
-├── person/
-│   ├── person.entity.ts      # Person entity with TypeORM and GraphQL decorators
-│   ├── person.service.ts     # Business logic for Person operations
-│   ├── person.resolver.ts    # GraphQL queries, mutations, and subscriptions
-│   └── person.module.ts      # Person module configuration
-├── post/
-│   ├── post.entity.ts        # Post entity with TypeORM and GraphQL decorators
-│   ├── post.service.ts       # Business logic for Post operations
-│   ├── post.resolver.ts      # GraphQL queries and mutations
-│   └── post.module.ts        # Post module configuration
-├── follower/
-│   ├── follower.entity.ts    # Follower entity with TypeORM and GraphQL decorators
-│   ├── follower.service.ts   # Business logic for Follower operations
-│   ├── follower.resolver.ts  # GraphQL queries and mutations
-│   └── follower.module.ts    # Follower module configuration
-├── app.module.ts             # Main application module
-└── main.ts                   # Application entry point
+├── common/                          # Shared utilities and services
+│   ├── dto/                        # Common DTOs
+│   │   └── pagination.dto.ts       # Pagination input type
+│   ├── exceptions/                 # Custom exception classes
+│   │   └── custom.exception.ts     # Base exception and specific exceptions
+│   ├── middleware/                 # Custom middleware
+│   │   └── rate-limit.middleware.ts # Rate limiting protection
+│   ├── services/                   # Shared services
+│   │   ├── base.service.ts         # Base CRUD service
+│   │   └── logger.service.ts       # Centralized logging
+│   └── testing/                    # Testing utilities
+│       └── test-utils.ts           # Mock repositories and test helpers
+├── config/                         # Configuration management
+│   ├── configuration.ts            # Environment-based configuration
+│   └── database.config.ts          # Database configuration
+├── health/                         # Health check module
+│   ├── health.controller.ts        # Health check endpoints
+│   └── health.module.ts            # Health module configuration
+├── person/                         # Person module
+│   ├── dto/                        # Person-specific DTOs
+│   │   ├── create-person.dto.ts    # Create person input
+│   │   └── update-person.dto.ts    # Update person input
+│   ├── person.entity.ts            # Person entity
+│   ├── person.service.ts           # Person business logic
+│   ├── person.resolver.ts          # GraphQL resolvers
+│   └── person.module.ts            # Person module configuration
+├── post/                           # Post module
+│   ├── post.entity.ts              # Post entity
+│   ├── post.service.ts             # Post business logic
+│   ├── post.resolver.ts            # GraphQL resolvers
+│   └── post.module.ts              # Post module configuration
+├── follower/                       # Follower module
+│   ├── follower.entity.ts          # Follower entity
+│   ├── follower.service.ts         # Follower business logic
+│   ├── follower.resolver.ts        # GraphQL resolvers
+│   └── follower.module.ts          # Follower module configuration
+├── app.module.ts                   # Main application module
+└── main.ts                         # Application entry point
 ```
 
-## Entity Relationships
-
-- **Person**: Has many posts and followers
-- **Post**: Belongs to one person
-- **Follower**: Links two persons (person being followed and the follower)
-
-## Setup Instructions
+## 🛠️ Setup Instructions
 
 ### Prerequisites
 
@@ -46,9 +67,41 @@ src/
 - PostgreSQL database
 - Yarn package manager
 
+### Environment Configuration
+
+Create a `.env` file based on `.env.example`:
+
+```bash
+# Application
+NODE_ENV=development
+PORT=3000
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=graphql_user
+DB_PASSWORD=admin
+DB_NAME=graphql_social
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_EXPIRES_IN=1d
+
+# CORS
+CORS_ORIGIN=http://localhost:3000
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+
+# Cache
+CACHE_TTL=60
+CACHE_MAX=100
+```
+
 ### Database Setup
 
-1. Create a PostgreSQL database:
+1. Create PostgreSQL database:
 ```sql
 CREATE DATABASE graphql_social;
 CREATE USER graphql_user WITH PASSWORD 'admin';
@@ -67,72 +120,137 @@ yarn install
 yarn start:dev
 ```
 
-The application will be available at `http://localhost:3000/graphql`
+The application will be available at:
+- GraphQL Playground: `http://localhost:3000/graphql`
+- Health Check: `http://localhost:3000/health`
 
-## GraphQL Operations
+## 🔧 Available Scripts
 
-### Queries
+- `yarn start:dev` - Start development server with hot reload
+- `yarn build` - Build the application
+- `yarn start:prod` - Start production server
+- `yarn test` - Run unit tests
+- `yarn test:e2e` - Run end-to-end tests
+- `yarn lint` - Run ESLint
+- `yarn format` - Format code with Prettier
+- `yarn migration:generate` - Generate new migration
+- `yarn migration:run` - Run pending migrations
+- `yarn migration:revert` - Revert last migration
 
-- `persons`: Get all persons with their posts and followers
-- `person(id)`: Get a specific person by ID
-- `posts`: Get all posts with their authors
-- `post(id)`: Get a specific post by ID
-- `followers`: Get all follower relationships
-- `follower(id)`: Get a specific follower relationship by ID
+## 📊 API Endpoints
 
-### Mutations
+### Health Check
+- `GET /health` - Application health status
 
-- `createPerson(name)`: Create a new person
-- `updatePerson(id, name)`: Update a person's name
-- `removePerson(id)`: Delete a person
-- `createPost(title, content, personId)`: Create a new post
-- `updatePost(id, title, content)`: Update a post
-- `removePost(id)`: Delete a post
-- `createFollower(personId, followerId)`: Create a follower relationship
-- `removeFollower(id)`: Remove a follower relationship
+### GraphQL Operations
 
-### Subscriptions
+#### Queries
+- `persons` - Get all persons with pagination
+- `person(id)` - Get specific person by ID
+- `posts` - Get all posts with pagination
+- `post(id)` - Get specific post by ID
+- `followers` - Get all follower relationships
+- `follower(id)` - Get specific follower relationship
 
-- `personCreated`: Subscribe to new person creation events
+#### Mutations
+- `createPerson(input)` - Create new person
+- `updatePerson(id, input)` - Update person
+- `removePerson(id)` - Delete person
+- `createPost(input)` - Create new post
+- `updatePost(id, input)` - Update post
+- `removePost(id)` - Delete post
+- `createFollower(input)` - Create follower relationship
+- `removeFollower(id)` - Remove follower relationship
 
-## Example GraphQL Queries
+#### Subscriptions
+- `personCreated` - Subscribe to new person creation
 
-```graphql
-# Create a person
-mutation {
-  createPerson(name: "John Doe") {
-    id
-    name
-  }
-}
+## 🏗️ Architecture Benefits
 
-# Get all persons with their posts
-query {
-  persons {
-    id
-    name
-    posts {
-      id
-      title
-      content
-    }
-  }
-}
+### 1. **Scalability**
+- Modular design allows easy scaling of individual components
+- Base service class reduces code duplication
+- Configuration management supports multiple environments
 
-# Subscribe to new person creation
-subscription {
-  personCreated {
-    id
-    name
-  }
-}
-```
+### 2. **Maintainability**
+- Clear separation of concerns
+- Consistent error handling
+- Centralized logging
+- Type-safe DTOs
 
-## Technologies Used
+### 3. **Reliability**
+- Health checks for monitoring
+- Rate limiting for protection
+- Comprehensive error handling
+- Database connection management
 
-- **NestJS**: Framework for building scalable server-side applications
-- **TypeORM**: Object-Relational Mapping for TypeScript and JavaScript
-- **GraphQL**: Query language and runtime for APIs
-- **Apollo Server**: GraphQL server implementation
-- **PostgreSQL**: Relational database
-- **TypeScript**: Programming language
+### 4. **Developer Experience**
+- Hot reload in development
+- GraphQL playground for API exploration
+- Comprehensive testing utilities
+- Code formatting and linting
+
+## 🔒 Security Features
+
+- Rate limiting to prevent abuse
+- Environment-based configuration
+- JWT-ready authentication structure
+- CORS configuration
+- Input validation (ready for class-validator)
+
+## 📈 Monitoring & Observability
+
+- Health check endpoints
+- Structured logging
+- Error tracking
+- Database connection monitoring
+
+## 🧪 Testing
+
+The project includes:
+- Unit testing utilities
+- Mock repository helpers
+- End-to-end testing setup
+- Test coverage reporting
+
+## 🚀 Deployment Ready
+
+- Environment-based configuration
+- Production database settings
+- Health check endpoints
+- Proper error handling
+- Logging for production debugging
+
+## 🔄 Future Enhancements
+
+- Authentication & Authorization
+- Caching layer (Redis)
+- File upload functionality
+- Real-time notifications
+- Advanced GraphQL features (federation, etc.)
+- Docker containerization
+- CI/CD pipeline setup
+
+## 📚 Technologies Used
+
+- **NestJS** - Scalable server-side framework
+- **GraphQL** - Query language and runtime
+- **Apollo Server** - GraphQL server implementation
+- **TypeORM** - Object-Relational Mapping
+- **PostgreSQL** - Relational database
+- **TypeScript** - Type-safe JavaScript
+- **Jest** - Testing framework
+- **Class Validator** - Input validation
+- **NestJS Terminus** - Health checks
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
